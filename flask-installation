@@ -1,0 +1,64 @@
+Install Python Virtualenv
+1.sudo apt-get update
+2.sudo apt-get install python3-venv
+Create directory
+3.mkdir helloworld
+4.cd helloworld
+Create the virtual environment
+5.python3 -m venv venv
+Activate the virtual environment
+6.source venv/bin/activate
+Install Flask
+7.pip install Flask
+Create a Simple Flask API
+Verify if it works by running
+8.sudo vi app.py
+9.// Add this to app.py
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+	return 'Hello World!'
+
+if __name__ == "__main__":
+	app.run()
+10.python app.py
+Install Gunicorn using the below command:
+11.pip install gunicorn
+Run Gunicorn:
+12.gunicorn -b 0.0.0.0:8000 app:app 
+13.sudo nano /etc/systemd/system/helloworld.service
+14.sudo nano /etc/nginx/sites-available/default
+Description=Gunicorn instance for a simple hello world app
+After=network.target
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/helloworld
+ExecStart=/home/ubuntu/helloworld/venv/bin/gunicorn -b localhost:8000 app:app
+Restart=always
+[Install]
+WantedBy=multi-user.target
+Then enable the service:
+15.sudo systemctl daemon-reload
+sudo systemctl start helloworld
+sudo systemctl enable helloworld
+ Check if the app is running 
+16.curl localhost:8000
+ Install Nginx
+17.sudo apt-get nginx
+   Start the Nginx service 
+18.sudo systemctl start nginx
+   sudo systemctl enable nginx
+   Edit the default file in the sites-available folder.
+19. sudo nano /etc/nginx/sites-available/default
+20.upstream flaskhelloworld {
+    server 127.0.0.1:8000;
+}
+21.location / {
+    proxy_pass http://flaskhelloworld;
+}
+Restart Nginx 
+22.sudo systemctl restart nginx
